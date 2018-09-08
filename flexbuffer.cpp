@@ -52,6 +52,7 @@ EMSCRIPTEN_BINDINGS(flexbuffers)
         .function("isMap", &flexbuffers::Reference::IsMap)
         .function("isBlob", &flexbuffers::Reference::IsBlob)
         .function("asNumber", &flexbuffers::Reference::AsDouble)
+        .function("asBool", &flexbuffers::Reference::AsBool)
         .function("asKey", optional_override([](const flexbuffers::Reference& ref) {
             return std::string(ref.AsKey());
         }))
@@ -101,57 +102,57 @@ EMSCRIPTEN_BINDINGS(flexbuffers)
         .function("clear", select_overload<void()>(&flexbuffers::Builder::Clear))
         .function("finish", &flexbuffers::Builder::Finish)
 
-        .function("add_null",
+        .function("addNull",
             optional_override([](flexbuffers::Builder& b) { b.Null(); }))
         .function(
-            "add_null",
+            "addNull",
             optional_override([](flexbuffers::Builder& b, const std::string& s) {
                 b.Null(s.c_str());
             }))
 
         .function(
-            "add_int",
+            "addInt",
             optional_override([](flexbuffers::Builder& b, int64_t i) { b.Int(i); }))
         .function(
-            "add_int",
+            "addInt",
             optional_override([](flexbuffers::Builder& b, const std::string& s, int64_t i) { b.Int(s.c_str(), i); }))
 
-        .function("add_uint", optional_override([](flexbuffers::Builder& b, uint64_t i) { b.UInt(i); }))
-        .function("add_uint",
+        .function("addUint", optional_override([](flexbuffers::Builder& b, uint64_t i) { b.UInt(i); }))
+        .function("addUint",
             optional_override(
                 [](flexbuffers::Builder& b, const std::string& s, uint64_t i) { b.UInt(s.c_str(), i); }))
 
-        .function("add_float", optional_override([](flexbuffers::Builder& b, float f) { b.Float(f); }))
-        .function("add_float",
+        .function("addFloat", optional_override([](flexbuffers::Builder& b, float f) { b.Float(f); }))
+        .function("addFloat",
             optional_override(
                 [](flexbuffers::Builder& b, const std::string& s, float f) { b.Float(s.c_str(), f); }))
 
-        .function("add_double", optional_override([](flexbuffers::Builder& b, float d) { b.Double(d); }))
-        .function("add_double",
+        .function("addDouble", optional_override([](flexbuffers::Builder& b, float d) { b.Double(d); }))
+        .function("addDouble",
             optional_override(
                 [](flexbuffers::Builder& b, const std::string& s, double d) { b.Double(s.c_str(), d); }))
 
-        .function("add_bool", optional_override([](flexbuffers::Builder& b, bool d) { b.Bool(d); }))
-        .function("add_bool",
+        .function("addBool", optional_override([](flexbuffers::Builder& b, bool d) { b.Bool(d); }))
+        .function("addBool",
             optional_override(
                 [](flexbuffers::Builder& b, const std::string& s, bool d) { b.Bool(s.c_str(), d); }))
 
-        .function("add_string", select_overload<size_t(const std::string&)>(&flexbuffers::Builder::String))
-        .function("add_string",
+        .function("addString", select_overload<size_t(const std::string&)>(&flexbuffers::Builder::String))
+        .function("addString",
             optional_override(
                 [](flexbuffers::Builder& b, const std::string& s, const std::string& v) { return b.String(s.c_str(), v); }))
 
-        .function("add_string", select_overload<size_t(const std::string&)>(&flexbuffers::Builder::Key))
+        .function("addKey", select_overload<size_t(const std::string&)>(&flexbuffers::Builder::Key))
 
-        .function("start_vector", select_overload<size_t()>(&flexbuffers::Builder::StartVector))
-        .function("start_vector",
+        .function("startVector", select_overload<size_t()>(&flexbuffers::Builder::StartVector))
+        .function("startVector",
             optional_override(
                 [](flexbuffers::Builder& b, const std::string& s, bool d) { return b.StartVector(s.c_str()); }))
-        .function("end_vector", &flexbuffers::Builder::EndVector)
+        .function("endVector", &flexbuffers::Builder::EndVector)
 
-        .function("start_map", select_overload<size_t()>(&flexbuffers::Builder::StartMap))
-        .function("start_map",
+        .function("startMap", select_overload<size_t()>(&flexbuffers::Builder::StartMap))
+        .function("startMap",
             optional_override(
                 [](flexbuffers::Builder& b, const std::string& s, bool d) { return b.StartMap(s.c_str()); }))
-        .function("end_map", &flexbuffers::Builder::EndMap);
+        .function("endMap", &flexbuffers::Builder::EndMap);
 }
