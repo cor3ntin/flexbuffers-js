@@ -1,4 +1,29 @@
 <script src="build/flexbuffers.js"></script>
 <script>
     var FlexBuffers = window.FlexBuffers({noInitialRun: true});
+    FlexBuffers.onRuntimeInitialized = function () {
+        const test = function(object) {
+            console.log("-----")
+            console.log("-->", object)
+            buffer = FlexBuffers.fromJSObject(object)
+            console.log("<--", buffer)
+            console.log("-->", FlexBuffers.toJSObject(buffer))
+        }
+        test({
+            "list" : [1, 2],
+            "null" : null,
+            "true" : true,
+            "map"  : { "Hello" : "World" }
+        })
+
+        test(null)
+        test(1)
+        test(-1)
+        test(2.1)
+        test(true)
+        test(false)
+        test(["hello", "World"])
+        test([])
+        test({})
+    }
 </script>
