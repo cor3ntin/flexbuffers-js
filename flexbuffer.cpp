@@ -3,6 +3,44 @@
 
 using namespace emscripten;
 
+val toJSObject(const flexbuffers::Reference& ref)
+{
+    if (ref.IsNumeric()) {
+        return val(ref.AsDouble());
+    }
+    if (ref.IsBool()) {
+        return val(ref.AsBool());
+    }
+    if (ref.IsNull()) {
+        return val::null();
+    }
+    if (ref.IsString()) {
+        return val(ref.ToString());
+    }
+    if (ref.IsVector() && !ref.IsMap()) {
+        val new_array = val::array();
+        const auto vec = ref.AsVector();
+        for (auto i = 0; i < vec.size(); i++) {
+            val value = toJSObject(vec[i]);
+            new_array.call<void>("push", value);
+        }
+        return new_array;
+    }
+    if (ref.IsMap()) {
+        val object = val::object();
+        const auto map = ref.AsMap();
+        const auto keys = map.Keys();
+
+        for (auto i = 0; i < keys.size(); i++) {
+            const val key(keys[i].AsKey());
+            const val value(toJSObject(map[keys[i].AsKey()]));
+            object.set(key, value);
+        }
+        return object;
+    }
+    return val::undefined();
+}
+
 EMSCRIPTEN_BINDINGS(flexbuffers)
 {
     enum_<flexbuffers::Type>("Type")
@@ -36,8 +74,8 @@ EMSCRIPTEN_BINDINGS(flexbuffers)
         .value("VECTOR_BOOL", flexbuffers::FBT_VECTOR_BOOL);
 
     function("getRoot",
-        optional_override([](unsigned char* data, size_t size) {
-            return flexbuffers::GetRoot(data, size);
+        optional_override([](intptr_t data, size_t size) {
+            return flexbuffers::GetRoot(reinterpret_cast<uint8_t*>(data), size);
         }),
         allow_raw_pointers());
 
@@ -68,7 +106,8 @@ EMSCRIPTEN_BINDINGS(flexbuffers)
         .function("asMap", &flexbuffers::Reference::AsMap)
         .function(
             "toString",
-            select_overload<std::string()>(&flexbuffers::Reference::ToString));
+            select_overload<std::string() const>(&flexbuffers::Reference::ToString))
+        .function("toJSObject", &toJSObject);
 
     class_<flexbuffers::Sized>("Sized").property("size",
         &flexbuffers::Sized::size);
@@ -112,25 +151,25 @@ EMSCRIPTEN_BINDINGS(flexbuffers)
 
         .function(
             "addInt",
-            optional_override([](flexbuffers::Builder& b, int64_t i) { b.Int(i); }))
+            optional_override([](flexbuffers::Builder& b, int32_t i) { b.Int(i); }))
         .function(
             "addInt",
-            optional_override([](flexbuffers::Builder& b, const std::string& s, int64_t i) { b.Int(s.c_str(), i); }))
+            optional_override([](flexbuffers::Builder& b, const std::string& s, int32_t i) { b.Int(s.c_str(), i); }))
 
-        .function("addUint", optional_override([](flexbuffers::Builder& b, uint64_t i) { b.UInt(i); }))
+        .function("addUint", optional_override([](flexbuffers::Builder& b, uint32_t i) { b.UInt(i); }))
         .function("addUint",
             optional_override(
-                [](flexbuffers::Builder& b, const std::string& s, uint64_t i) { b.UInt(s.c_str(), i); }))
+                [](flexbuffers::Builder& b, const std::string& s, uint32_t i) { b.UInt(s.c_str(), i); }))
 
         .function("addFloat", optional_override([](flexbuffers::Builder& b, float f) { b.Float(f); }))
         .function("addFloat",
             optional_override(
                 [](flexbuffers::Builder& b, const std::string& s, float f) { b.Float(s.c_str(), f); }))
 
-        .function("addDouble", optional_override([](flexbuffers::Builder& b, float d) { b.Double(d); }))
+        .function("addDouble", optional_override([](flexbuffers::Builder& b, val d) { b.Double(d.as<double>()); }))
         .function("addDouble",
             optional_override(
-                [](flexbuffers::Builder& b, const std::string& s, double d) { b.Double(s.c_str(), d); }))
+                [](flexbuffers::Builder& b, const std::string& s, val d) { b.Double(s.c_str(), d.as<double>()); }))
 
         .function("addBool", optional_override([](flexbuffers::Builder& b, bool d) { b.Bool(d); }))
         .function("addBool",
