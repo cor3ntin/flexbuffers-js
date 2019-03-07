@@ -1,11 +1,11 @@
 {
   "name": "@cor3ntin/flexbuffers-wasm",
   "author": "cor3ntin",
-  "version": "0.0.14",
+  "version": "0.0.18",
   "description": "Flexbuffers for JS and typescript on browsers and node using webassembly",
   "main": "./flexbuffers.js",
   "types": "./flexbuffers.d.ts",
   "homepage": "https://github.com/cor3ntin/flexbuffers-js",
   "repository": "https://github.com/cor3ntin/flexbuffers-js",
-  "license" : "MIT"
+  "license": "MIT"
 }
